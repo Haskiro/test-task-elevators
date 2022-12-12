@@ -1,7 +1,12 @@
 <template>
 	<div class="form">
-		<label for="elevator-button">{{ floor }}</label>
-		<input type="radio" id="elevator-button" class="button" />
+		<label :for="'elevator-button' + floor">{{ floor }}</label>
+		<input
+			type="radio"
+			:id="'elevator-button' + floor"
+			class="button"
+			@click="callElevator"
+		/>
 	</div>
 </template>
 
@@ -11,7 +16,14 @@ export default {
 	props: {
 		floor: Number,
 	},
-	methods: {},
+	data() {
+		return {};
+	},
+	methods: {
+		callElevator: function () {
+			this.$emit("callElevator", this.floor);
+		},
+	},
 };
 </script>
 

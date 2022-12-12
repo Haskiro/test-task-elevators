@@ -13,7 +13,7 @@
 		>
 			<elevator-shaft
 				v-for="floor in floorList"
-				:key="floor"
+				:key="floor.id"
 				:windowHeight="windowHeight"
 				:floorCount="floorCount"
 				:floorHeight="calcFloorHeight()"
@@ -27,9 +27,10 @@
 		<li class="buttonsList">
 			<elevator-button
 				v-for="floor in floorList"
-				:floor="floor"
-				:key="floor"
+				:floor="floor.id"
+				:key="floor.id"
 				:style="{ flexBasis: calcFloorHeight() + 1 + 'px' }"
+				@callElevator="callElevator"
 			/>
 		</li>
 	</ul>
@@ -39,8 +40,13 @@
 import "../styles/reset.scss";
 import ElevatorShaft from "@/components/ElevatorShaft";
 import ElevatorButton from "@/components/ElevatorButton";
-import ElevatorCabin from "@/components/ElevatorCabin.vue";
+import ElevatorCabin from "@/components/ElevatorCabin";
 import { uuid } from "vue-uuid";
+import {
+	checkIfFloorIsInTarget,
+	checkPresenceElevatorOnTheFloor,
+	findNearestElevator,
+} from "@/utils/elevator.js";
 
 export default {
 	name: "App",
@@ -49,21 +55,7 @@ export default {
 		return {
 			floorCount: 5,
 			elevatorCount: 2,
-			elevators: [
-				{
-					id: uuid.v4(),
-					currentFloor: 1,
-					moveTo: [5],
-					moving: true,
-				},
-				{
-					id: uuid.v4(),
-					currentFloor: 1,
-					moveTo: [],
-					moving: false,
-				},
-			],
-			elevatorMargin: null,
+			elevators: [],
 			windowHeight: null,
 			windowWidth: null,
 			floorList: [],
@@ -71,10 +63,10 @@ export default {
 	},
 	created() {
 		this.createFloorList();
+		this.createElevatorList();
 	},
 	mounted() {
 		this.matchHeightAndWidth();
-		this.calcElevatorMargin();
 	},
 	methods: {
 		matchHeightAndWidth: function () {
@@ -88,13 +80,36 @@ export default {
 			return Math.floor(this.windowHeight / this.floorCount);
 		},
 		createFloorList: function () {
-			for (var i = 1; i <= this.floorCount; i++) {
-				this.floorList.unshift(i);
+			for (let i = 1; i <= this.floorCount; i++) {
+				if (i === 1) {
+					this.floorList.unshift({
+						id: i,
+						elevatorCount: this.elevatorCount,
+					});
+				} else {
+					this.floorList.unshift({ id: i, elevatorCount: 0 });
+				}
 			}
 		},
-		calcElevatorMargin: function () {
-			this.elevatorMargin =
-				this.windowHeight - this.calcFloorHeight() * this.floorCount;
+		createElevatorList: function () {
+			for (let i = 1; i <= this.elevatorCount; i++) {
+				this.elevators.push({
+					id: uuid.v4(),
+					currentFloor: 1,
+					moveTo: [],
+					moving: false,
+				});
+			}
+		},
+		callElevator: function (floor) {
+			if (checkIfFloorIsInTarget(floor, this.elevators)) return;
+			if (checkPresenceElevatorOnTheFloor(floor, this.floorList)) return;
+			const elevatorId = findNearestElevator(floor, this.elevators);
+			const indexOfElevator = this.elevators.findIndex(
+				(el) => el.id === elevatorId
+			);
+			this.elevators[indexOfElevator].moveTo.push(floor);
+			this.elevators[indexOfElevator].moving = true;
 		},
 	},
 	computed: {},
