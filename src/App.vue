@@ -40,7 +40,7 @@
 </template>
 
 <script>
-import "../styles/reset.scss";
+import "@/styles/reset.scss";
 import ElevatorShaft from "@/components/ElevatorShaft";
 import ElevatorButton from "@/components/ElevatorButton";
 import ElevatorCabin from "@/components/ElevatorCabin";
@@ -67,7 +67,6 @@ export default {
 		};
 	},
 	created() {
-		// localStorage.clear();
 		this.checkLocalStorage();
 	},
 	mounted() {

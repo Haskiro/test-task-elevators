@@ -13,6 +13,9 @@
 <script>
 export default {
 	name: "ElevatorButton",
+	data() {
+		return {};
+	},
 	props: {
 		button: Object,
 	},
