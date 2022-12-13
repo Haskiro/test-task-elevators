@@ -6,7 +6,9 @@
 	>
 		<span
 			v-show="
-				elevator.moving && elevator.moveTo[0] !== elevator.currentFloor
+				elevator.moving &&
+				elevator.moveTo[0] !== elevator.currentFloor &&
+				!elevator.waiting
 			"
 			class="iconWrapper"
 			><img

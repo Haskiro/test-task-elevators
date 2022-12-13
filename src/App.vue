@@ -31,6 +31,7 @@
 			<elevator-button
 				v-for="floor in floorList"
 				:floor="floor.id"
+				:elevatorsCount="floor.elevatorCount"
 				:key="floor.id"
 				:style="{ flexBasis: calcFloorHeight() + 1 + 'px' }"
 				@callElevator="callElevator"
@@ -49,7 +50,7 @@ import {
 	checkIfFloorIsInTarget,
 	checkPresenceElevatorOnTheFloor,
 	findNearestElevator,
-	sleep,
+	moveElevator,
 } from "@/utils/elevator.js";
 
 export default {
@@ -58,7 +59,7 @@ export default {
 	data() {
 		return {
 			floorCount: 7,
-			elevatorCount: 1,
+			elevatorCount: 4,
 			elevators: [],
 			windowHeight: null,
 			windowWidth: null,
@@ -117,52 +118,16 @@ export default {
 				(el) => el.id === elevatorId
 			);
 			const currentElevator = this.elevators[indexOfElevator];
-			const indexOfFloor = this.floorList.findIndex(
-				(el) => el.id === currentElevator.currentFloor
-			);
-			if (this.floorList[indexOfFloor].elevatorCount > 0)
-				this.floorList[indexOfFloor].elevatorCount -= 1;
 			currentElevator.moveTo.push(floor);
 			currentElevator.moving = true;
 			currentElevator.firstCall = false;
 			if (currentElevator.moveListIsEmpty === true)
-				this.moveElevator(currentElevator);
+				moveElevator(
+					currentElevator,
+					this.floorList,
+					this.calcFloorHeight
+				);
 			currentElevator.moveListIsEmpty = false;
-		},
-		moveElevator: async function (currentElevator) {
-			while (currentElevator.moveTo.length > 0) {
-				if (currentElevator.currentFloor < currentElevator.moveTo[0]) {
-					const dif =
-						currentElevator.moveTo[0] -
-						currentElevator.currentFloor;
-					for (let i = 1; i <= dif; i++) {
-						currentElevator.currentHeight +=
-							this.calcFloorHeight() + 2;
-						await sleep(1000);
-						currentElevator.currentFloor += 1;
-					}
-					currentElevator.moveTo.shift();
-					if (currentElevator.moveTo.length === 0)
-						currentElevator.moving = false;
-				} else {
-					const dif =
-						currentElevator.currentFloor -
-						currentElevator.moveTo[0];
-					for (let i = 1; i <= dif; i++) {
-						currentElevator.currentHeight -=
-							this.calcFloorHeight() + 2;
-						await sleep(1000);
-						currentElevator.currentFloor -= 1;
-					}
-					currentElevator.moveTo.shift();
-					if (currentElevator.moveTo.length === 0)
-						currentElevator.moving = false;
-				}
-				currentElevator.waiting = true;
-				await sleep(3000);
-				currentElevator.waiting = false;
-			}
-			currentElevator.moveListIsEmpty = true;
 		},
 	},
 	computed: {},

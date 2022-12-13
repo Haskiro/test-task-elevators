@@ -17,7 +17,7 @@ export function checkPresenceElevatorOnTheFloor(floor, floorList) {
 	return floorList.find((el) => el.id === floor).elevatorCount > 0;
 }
 
-//
+//Поиск ближайшего лифта, приоритет у свободных
 export function findNearestElevator(floor, elevators) {
 	let nearestElevator;
 	let minDif = 1000;
@@ -52,4 +52,48 @@ export function findWorkfreeElevators(elevators) {
 
 export function sleep(ms) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+//Логика движения лифта
+export async function moveElevator(
+	currentElevator,
+	floorList,
+	calcFloorHeight
+) {
+	while (currentElevator.moveTo.length > 0) {
+		const indexOfFloor = floorList.findIndex(
+			(el) => el.id === currentElevator.currentFloor
+		);
+		if (floorList[indexOfFloor].elevatorCount > 0)
+			floorList[indexOfFloor].elevatorCount -= 1;
+		if (currentElevator.currentFloor < currentElevator.moveTo[0]) {
+			const dif =
+				currentElevator.moveTo[0] - currentElevator.currentFloor;
+			for (let i = 1; i <= dif; i++) {
+				currentElevator.currentHeight += calcFloorHeight() + 2;
+				await sleep(1000);
+				currentElevator.currentFloor += 1;
+			}
+			floorList[
+				floorList.findIndex((el) => el.id === currentElevator.moveTo[0])
+			].elevatorCount += 1;
+		} else {
+			const dif =
+				currentElevator.currentFloor - currentElevator.moveTo[0];
+			for (let i = 1; i <= dif; i++) {
+				currentElevator.currentHeight -= calcFloorHeight() + 2;
+				await sleep(1000);
+				currentElevator.currentFloor -= 1;
+			}
+			floorList[
+				floorList.findIndex((el) => el.id === currentElevator.moveTo[0])
+			].elevatorCount += 1;
+		}
+		currentElevator.waiting = true;
+		await sleep(3000);
+		currentElevator.moveTo.shift();
+		currentElevator.waiting = false;
+	}
+	currentElevator.moving = false;
+	currentElevator.moveListIsEmpty = true;
 }
