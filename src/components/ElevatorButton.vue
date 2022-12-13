@@ -1,11 +1,11 @@
 <template>
 	<div class="form">
-		<p>{{ floor }}</p>
+		<p>{{ button.id }}</p>
 		<button
 			@click="callElevator"
-			:id="'elevator-button' + floor"
+			:id="'elevator-button' + button.id"
 			class="button"
-			:class="{ checked: checked }"
+			:class="{ checked: button.checked }"
 		/>
 	</div>
 </template>
@@ -14,25 +14,11 @@
 export default {
 	name: "ElevatorButton",
 	props: {
-		floor: Number,
-		elevatorsCount: Number,
-	},
-	data() {
-		return {
-			checked: false,
-		};
-	},
-	watch: {
-		elevatorsCount(value) {
-			if (value > 0) this.checked = false;
-		},
+		button: Object,
 	},
 	methods: {
 		callElevator: function () {
-			this.$emit("callElevator", this.floor);
-			if (this.elevatorsCount === 0) {
-				this.checked = true;
-			}
+			this.$emit("callElevator", this.button.id);
 		},
 	},
 };

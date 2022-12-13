@@ -45,7 +45,7 @@ export default {
 		animation: blinker cubic-bezier(1, 0, 0, 1) 1s infinite;
 	}
 	&.smooth {
-		transition: 1s linear;
+		transition: bottom 1s linear;
 	}
 }
 
@@ -59,9 +59,10 @@ export default {
 }
 
 .iconWrapper {
-	width: 40px;
+	width: 60px;
 	display: flex;
 	align-items: center;
+	justify-content: center;
 	gap: 5px;
 	height: 20px;
 	margin: 0px auto;

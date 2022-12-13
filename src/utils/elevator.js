@@ -1,12 +1,24 @@
 /* 
 floor: number - номер этажа
+
 elevators: {
 	id: string, 
 	currentFloor: number, 
 	moveTo: string[],
 	moving: boolean
  }[] - список лифтов
+
+ floorList: {
+	id: number, 
+	elevatorsCount: number
+ }[] - список этажей
+
+ buttonsList: {
+	id: number,
+	cheked: boolead
+ }[] - список кнопок
 */
+
 // Проверка, назначен ли заданному этажу лифт
 export function checkIfFloorIsInTarget(floor, elevators) {
 	return elevators.some((el) => el.moveTo.some((el) => el === floor));
@@ -58,6 +70,7 @@ export function sleep(ms) {
 export async function moveElevator(
 	currentElevator,
 	floorList,
+	buttonsList,
 	calcFloorHeight
 ) {
 	while (currentElevator.moveTo.length > 0) {
@@ -90,6 +103,11 @@ export async function moveElevator(
 			].elevatorCount += 1;
 		}
 		currentElevator.waiting = true;
+		buttonsList[
+			buttonsList.findIndex(
+				(item) => item.id === currentElevator.moveTo[0]
+			)
+		].checked = false;
 		await sleep(3000);
 		currentElevator.moveTo.shift();
 		currentElevator.waiting = false;
