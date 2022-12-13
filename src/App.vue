@@ -22,6 +22,9 @@
 				class="elevator"
 				:elevator="elevators[n - 1]"
 				:floorHeight="calcFloorHeight()"
+				:style="{
+					bottom: elevators[n - 1].currentHeight + 'px',
+				}"
 			/>
 		</li>
 		<li class="buttonsList">
@@ -46,6 +49,7 @@ import {
 	checkIfFloorIsInTarget,
 	checkPresenceElevatorOnTheFloor,
 	findNearestElevator,
+	sleep,
 } from "@/utils/elevator.js";
 
 export default {
@@ -53,8 +57,8 @@ export default {
 	components: { ElevatorShaft, ElevatorButton, ElevatorCabin },
 	data() {
 		return {
-			floorCount: 5,
-			elevatorCount: 2,
+			floorCount: 7,
+			elevatorCount: 1,
 			elevators: [],
 			windowHeight: null,
 			windowWidth: null,
@@ -98,6 +102,10 @@ export default {
 					currentFloor: 1,
 					moveTo: [],
 					moving: false,
+					currentHeight: 0,
+					firstCall: true,
+					moveListIsEmpty: true,
+					waiting: false,
 				});
 			}
 		},
@@ -108,8 +116,53 @@ export default {
 			const indexOfElevator = this.elevators.findIndex(
 				(el) => el.id === elevatorId
 			);
-			this.elevators[indexOfElevator].moveTo.push(floor);
-			this.elevators[indexOfElevator].moving = true;
+			const currentElevator = this.elevators[indexOfElevator];
+			const indexOfFloor = this.floorList.findIndex(
+				(el) => el.id === currentElevator.currentFloor
+			);
+			if (this.floorList[indexOfFloor].elevatorCount > 0)
+				this.floorList[indexOfFloor].elevatorCount -= 1;
+			currentElevator.moveTo.push(floor);
+			currentElevator.moving = true;
+			currentElevator.firstCall = false;
+			if (currentElevator.moveListIsEmpty === true)
+				this.moveElevator(currentElevator);
+			currentElevator.moveListIsEmpty = false;
+		},
+		moveElevator: async function (currentElevator) {
+			while (currentElevator.moveTo.length > 0) {
+				if (currentElevator.currentFloor < currentElevator.moveTo[0]) {
+					const dif =
+						currentElevator.moveTo[0] -
+						currentElevator.currentFloor;
+					for (let i = 1; i <= dif; i++) {
+						currentElevator.currentHeight +=
+							this.calcFloorHeight() + 2;
+						await sleep(1000);
+						currentElevator.currentFloor += 1;
+					}
+					currentElevator.moveTo.shift();
+					if (currentElevator.moveTo.length === 0)
+						currentElevator.moving = false;
+				} else {
+					const dif =
+						currentElevator.currentFloor -
+						currentElevator.moveTo[0];
+					for (let i = 1; i <= dif; i++) {
+						currentElevator.currentHeight -=
+							this.calcFloorHeight() + 2;
+						await sleep(1000);
+						currentElevator.currentFloor -= 1;
+					}
+					currentElevator.moveTo.shift();
+					if (currentElevator.moveTo.length === 0)
+						currentElevator.moving = false;
+				}
+				currentElevator.waiting = true;
+				await sleep(3000);
+				currentElevator.waiting = false;
+			}
+			currentElevator.moveListIsEmpty = true;
 		},
 	},
 	computed: {},

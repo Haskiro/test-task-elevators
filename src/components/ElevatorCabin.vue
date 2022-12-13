@@ -1,8 +1,12 @@
 <template>
-	<div class="elevator" :style="{ height: floorHeight + 2 + 'px' }">
+	<div
+		class="elevator"
+		:class="{ waiting: elevator.waiting, smooth: !elevator.firstCall }"
+		:style="{ height: floorHeight + 2 + 'px' }"
+	>
 		<span
 			v-show="
-				elevator.moving && elevator.currentFloor !== elevator.moveTo[0]
+				elevator.moving && elevator.moveTo[0] !== elevator.currentFloor
 			"
 			class="iconWrapper"
 			><img
@@ -35,6 +39,21 @@ export default {
 .elevator {
 	background: cyan;
 	width: 100%;
+	&.waiting {
+		animation: blinker cubic-bezier(1, 0, 0, 1) 1s infinite;
+	}
+	&.smooth {
+		transition: 1s linear;
+	}
+}
+
+@keyframes blinker {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0.4;
+	}
 }
 
 .iconWrapper {

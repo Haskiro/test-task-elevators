@@ -49,3 +49,7 @@ export function findNearestElevator(floor, elevators) {
 export function findWorkfreeElevators(elevators) {
 	return elevators.filter((el) => el.moving === false);
 }
+
+export function sleep(ms) {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}
