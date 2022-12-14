@@ -9,7 +9,7 @@ floorCount: 5,
 elevatorCount: 1
 ```
 
-## Установка зависимости
+## Установка зависимостей
 
 ```
 npm install
